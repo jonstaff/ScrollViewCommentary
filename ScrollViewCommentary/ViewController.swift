@@ -13,6 +13,8 @@ class ViewController: UIViewController {
   weak var scrollView: UIScrollView!
   weak var boundsLabel: UILabel!
   weak var contentOffsetLabel: UILabel!
+  weak var contentInsetLabel: UILabel!
+  weak var contentInsetSlider: UISlider!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -21,11 +23,20 @@ class ViewController: UIViewController {
     scrollView = createScrollView()
     boundsLabel = createBoundsLabel()
     contentOffsetLabel = createContentOffsetLabel()
+    contentInsetLabel = createContentInsetLabel()
+    contentInsetSlider = createContentInsetSlider()
 
-    NSLayoutConstraint(item: boundsLabel,
+    NSLayoutConstraint(item: contentOffsetLabel,
+                       attribute: .Top,
+                       relatedBy: .Equal,
+                       toItem: boundsLabel,
+                       attribute: .Bottom,
+                       multiplier: 1.0,
+                       constant: 8).active = true
+    NSLayoutConstraint(item: contentInsetLabel,
                        attribute: .Bottom,
                        relatedBy: .Equal,
-                       toItem: contentOffsetLabel,
+                       toItem: contentInsetSlider,
                        attribute: .Top,
                        multiplier: 1.0,
                        constant: -8).active = true
@@ -45,6 +56,7 @@ private extension ViewController {
 
     scrollView.addSubview(imageView)
     scrollView.contentSize.width = CGRectGetWidth(imageView.bounds)
+    scrollView.contentInset.left = 50
 
     scrollView.delegate = self
     return scrollView
@@ -63,6 +75,13 @@ private extension ViewController {
                        attribute: .Leading,
                        multiplier: 1.0,
                        constant: 8).active = true
+    NSLayoutConstraint(item: label,
+                       attribute: .Top,
+                       relatedBy: .Equal,
+                       toItem: view,
+                       attribute: .Top,
+                       multiplier: 1.0,
+                       constant: 30).active = true
 
     return label
   }
@@ -74,12 +93,22 @@ private extension ViewController {
     view.addSubview(label)
 
     NSLayoutConstraint(item: label,
-                       attribute: .Bottom,
+                       attribute: .Leading,
                        relatedBy: .Equal,
                        toItem: view,
-                       attribute: .Bottom,
+                       attribute: .Leading,
                        multiplier: 1.0,
-                       constant: -8).active = true
+                       constant: 8).active = true
+
+    return label
+  }
+
+  func createContentInsetLabel() -> UILabel {
+    let label = UILabel()
+    label.textColor = .whiteColor()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(label)
+
     NSLayoutConstraint(item: label,
                        attribute: .Leading,
                        relatedBy: .Equal,
@@ -89,6 +118,45 @@ private extension ViewController {
                        constant: 8).active = true
 
     return label
+  }
+
+  func createContentInsetSlider() -> UISlider {
+    let slider = UISlider()
+    slider.minimumValue = 0.0
+    slider.maximumValue = 100.0
+    slider.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(slider)
+
+    NSLayoutConstraint(item: slider,
+                       attribute: .Leading,
+                       relatedBy: .Equal,
+                       toItem: view,
+                       attribute: .Leading,
+                       multiplier: 1.0,
+                       constant: 8).active = true
+    NSLayoutConstraint(item: slider,
+                       attribute: .Width,
+                       relatedBy: .Equal,
+                       toItem: .None,
+                       attribute: .NotAnAttribute,
+                       multiplier: 1.0,
+                       constant: 100).active = true
+    NSLayoutConstraint(item: slider,
+                       attribute: .Bottom,
+                       relatedBy: .Equal,
+                       toItem: view,
+                       attribute: .Bottom,
+                       multiplier: 1.0,
+                       constant: -8).active = true
+
+    slider.addTarget(self, action: #selector(updateContentInset), forControlEvents: .ValueChanged)
+    return slider
+  }
+
+  @objc func updateContentInset() {
+    let contentInset = CGFloat(contentInsetSlider.value)
+    contentInsetLabel.text = String(format: "contentInset.left: %.2f", contentInset)
+    scrollView.contentInset.left = contentInset
   }
 }
 
